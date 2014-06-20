@@ -1,6 +1,7 @@
 Machine Learning Course Project
 ========================================================
 
+##Load Data
 Downloading the datasets from internet (source = http://groupware.les.inf.puc-rio.br/har)
 and loading the Raw train and test datasets:
 ```{r cache=TRUE}
@@ -11,16 +12,24 @@ testingRAW <- read.csv('pml-testing.csv', na.strings= c("NA",""))
 
 ```
 
-###Cleanning the dataset and feature Selection
+##Cleaning and feature Selection
+We discard from the datasets the columns with NAs and the next columns:
+- timestamp and windows related columns
+- X column, since it seems an index column
+- user column.
+We keep the columns of actual sensor data.
 
-```{r}
+```{r message=FALSE}
 na_cols <- colSums(is.na(trainingRAW))!=0
 remove_cols <- grepl("timestamp|window|user|X",names(trainingRAW))
 training <- trainingRAW[,!(na_cols|remove_cols)]
 ```
+## Data Processing and Training
+We create data partition in the training set to perform the training in a part and validate the model in the other part. We chose 0.4 to get around 7500 observations.
+More observations will increase the processing time of the model.
+Now it takes less than an hour in a core i5 with 8GB RAM
 
-### Partitioning the training set to perform cross-validation and speed up training
-```{r cache=TRUE}
+```{r cache=TRUE, message=FALSE}
 library(caret)
 inTrain <- createDataPartition(training$classe,p=0.4,list=FALSE)
 subtraining <- training[inTrain,]
@@ -28,12 +37,14 @@ crossvalid <- training[-inTrain,]
 modelFit <- train(classe ~.,data=subtraining,method="rf")
 ```
 
-### Getting out of sample error
+## Model Validation
+We validate the model predicting the values of the classe variable of the observations not used to compute the model. Then we compare with the real values of the observations to calculate the Accuracy and other error measurements:
 ```{r}
 library(caret)
 confusionMatrix(crossvalid$classe,predict(modelFit,crossvalid))
 ```
 ## Predict testing values
+We can know calculate the prediction of the classe variable for the testing dataset.
 ```{r}
 result <-predict(modelFit,testingRAW)
 ```
