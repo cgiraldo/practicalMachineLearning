@@ -1,0 +1,39 @@
+Machine Learning Course Project
+========================================================
+
+Downloading the datasets from internet (source = http://groupware.les.inf.puc-rio.br/har)
+and loading the Raw train and test datasets:
+```{r cache=TRUE}
+download.file('https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv',destfile='pml-training.csv',method='curl')
+download.file('https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv',destfile='pml-testing.csv',method='curl')
+trainingRAW <- read.csv('pml-training.csv', na.strings= c("NA",""))
+testingRAW <- read.csv('pml-testing.csv', na.strings= c("NA",""))
+
+```
+
+###Cleanning the dataset and feature Selection
+
+```{r}
+na_cols <- colSums(is.na(trainingRAW))!=0
+remove_cols <- grepl("timestamp|window|user|X",names(trainingRAW))
+training <- trainingRAW[,!(na_cols|remove_cols)]
+```
+
+### Partitioning the training set to perform cross-validation and speed up training
+```{r cache=TRUE}
+library(caret)
+inTrain <- createDataPartition(training$classe,p=0.4,list=FALSE)
+subtraining <- training[inTrain,]
+crossvalid <- training[-inTrain,]
+modelFit <- train(classe ~.,data=subtraining,method="rf")
+```
+
+### Getting out of sample error
+```{r}
+library(caret)
+confusionMatrix(crossvalid$classe,predict(modelFit,crossvalid))
+```
+## Predict testing values
+```{r}
+result <-predict(modelFit,testingRAW)
+```
