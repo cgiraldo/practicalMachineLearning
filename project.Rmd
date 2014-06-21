@@ -31,6 +31,7 @@ Now it takes less than an hour in a core i5 with 8GB RAM
 
 ```{r cache=TRUE, message=FALSE}
 library(caret)
+set.seed(12345)
 inTrain <- createDataPartition(training$classe,p=0.4,list=FALSE)
 subtraining <- training[inTrain,]
 crossvalid <- training[-inTrain,]
