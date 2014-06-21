@@ -74,6 +74,7 @@ training &lt;- trainingRAW[,!(na_cols|remove_cols)]</code></pre>
 <h2>Data Processing and Training</h2>
 <p>We create data partition in the training set to perform the training in a part and validate the model in the other part. We chose 0.4 to get around 7500 observations. More observations will increase the processing time of the model. Now it takes less than an hour in a core i5 with 8GB RAM</p>
 <pre class="r"><code>library(caret)
+set.seed(12345)
 inTrain &lt;- createDataPartition(training$classe,p=0.4,list=FALSE)
 subtraining &lt;- training[inTrain,]
 crossvalid &lt;- training[-inTrain,]
@@ -82,44 +83,39 @@ modelFit &lt;- train(classe ~.,data=subtraining,method=&quot;rf&quot;)</code></p
 <div id="model-validation" class="section level2">
 <h2>Model Validation</h2>
 <p>We validate the model predicting the values of the classe variable of the observations not used to compute the model. Then we compare with the real values of the observations to calculate the Accuracy and other error measurements:</p>
-<pre class="r"><code>library(caret)</code></pre>
-<pre><code>## Loading required package: lattice
-## Loading required package: ggplot2</code></pre>
-<pre class="r"><code>confusionMatrix(crossvalid$classe,predict(modelFit,crossvalid))</code></pre>
-<pre><code>## Loading required package: randomForest
-## randomForest 4.6-7
-## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre class="r"><code>library(caret)
+confusionMatrix(crossvalid$classe,predict(modelFit,crossvalid))</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 3341    4    1    2    0
-##          B   40 2211   27    0    0
-##          C    0   38 2009    6    0
-##          D    0    0   46 1877    6
-##          E    0    0    0    6 2158
+##          A 3338    9    0    0    1
+##          B   34 2219   23    0    2
+##          C    0   23 2015   15    0
+##          D    1    1   30 1897    0
+##          E    0    3    4   10 2147
 ## 
 ## Overall Statistics
 ##                                         
-##                Accuracy : 0.985         
-##                  95% CI : (0.983, 0.987)
+##                Accuracy : 0.987         
+##                  95% CI : (0.985, 0.989)
 ##     No Information Rate : 0.287         
 ##     P-Value [Acc &gt; NIR] : &lt;2e-16        
 ##                                         
-##                   Kappa : 0.981         
+##                   Kappa : 0.983         
 ##  Mcnemar's Test P-Value : NA            
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity             0.988    0.981    0.964    0.993    0.997
-## Specificity             0.999    0.993    0.995    0.995    0.999
-## Pos Pred Value          0.998    0.971    0.979    0.973    0.997
-## Neg Pred Value          0.995    0.996    0.992    0.999    0.999
-## Prevalence              0.287    0.191    0.177    0.161    0.184
-## Detection Rate          0.284    0.188    0.171    0.159    0.183
+## Sensitivity             0.990    0.984    0.972    0.987    0.999
+## Specificity             0.999    0.994    0.996    0.997    0.998
+## Pos Pred Value          0.997    0.974    0.981    0.983    0.992
+## Neg Pred Value          0.996    0.996    0.994    0.997    1.000
+## Prevalence              0.287    0.192    0.176    0.163    0.183
+## Detection Rate          0.284    0.188    0.171    0.161    0.182
 ## Detection Prevalence    0.284    0.194    0.174    0.164    0.184
-## Balanced Accuracy       0.994    0.987    0.980    0.994    0.998</code></pre>
+## Balanced Accuracy       0.994    0.989    0.984    0.992    0.998</code></pre>
 </div>
 <div id="predict-testing-values" class="section level2">
 <h2>Predict testing values</h2>
